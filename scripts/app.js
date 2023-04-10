@@ -28,20 +28,18 @@ function loadData() {
     }
 }
 
-function requestJson (url) {
+function requestJson(url) {
     let req = new XMLHttpRequest();
-        req.open('GET', url, false);
-        req.setRequestHeader('Content-Type', 'application/json');
-        req.send();
-        console.log(req.status)
-        return req.response;
+    req.open('GET', url);
+    req.setRequestHeader('Content-Type', 'application/json');
+    req.send();
+    req.onload = () => {
+        let data = req.response
+        localStorage.setItem(HABBIT_KEY, data);
 
+    };
 }
-let answerDemo = requestJson('./data/demo.json');
-
-function saveData(habbits) {
-    localStorage.setItem(HABBIT_KEY, habbits);
-}
+requestJson('./data/demo.json');
 
 // render 
 function rerenderMenu(activeHabbit) {
@@ -105,8 +103,7 @@ function rerender(activeHabbitId) {
 
 // init
 (() => {
-    saveData(answerDemo)
-    loadData();
+    loadData(); 
     rerender(habbits[0].id);
-    // console.log(rerender());
+    console.log(rerender());
 })()
