@@ -46,8 +46,8 @@ function requestJson(url) {
     // .then(data => data.json())
     .then(data => JSON.stringify(data))
     .then(data => localStorage.setItem(HABBIT_KEY, data))
-    .finally(function(e) {
-        console.log(`oblom`)
+    .catch(function(e) {
+        console.log(`oblom ${e}}`)
     })
 
 }
