@@ -29,16 +29,37 @@ function loadData() {
 }
 
 function requestJson(url) {
-    let req = new XMLHttpRequest();
-    req.open('GET', url);
-    req.setRequestHeader('Content-Type', 'application/json');
-    req.send();
-    req.onload = () => {
-        let data = req.response
-        localStorage.setItem(HABBIT_KEY, data);
+    // let req = new XMLHttpRequest();
+    // req.open('GET', url);
+    // req.setRequestHeader('Content-Type', 'application/json');
+    // req.send();
+    // req.onload = () => {
+    //     let data = req.response;
+    //     if (req.statusText === "OK") {
+    //         localStorage.setItem(HABBIT_KEY, data);
+    //     } else {
+    //         throw 'sad';
+    //     }
+    // };
 
-    };
+    getResource(url)
+    // .then(data => data.json())
+    .then(data => JSON.stringify(data))
+    .then(data => localStorage.setItem(HABBIT_KEY, data))
+    .finally(function(e) {
+        console.log(`oblom`)
+    })
+
 }
+
+async function getResource(url) {
+    const req = await fetch(`${url}`);
+    if (!req.ok) {
+        throw new Error(`could not fetch ${url}, status: ${req.status}`)
+    }
+    return await req.json();
+}
+
 requestJson('./data/demo.json');
 
 // render 
@@ -105,5 +126,4 @@ function rerender(activeHabbitId) {
 (() => {
     loadData(); 
     rerender(habbits[0].id);
-    console.log(rerender());
 })()
