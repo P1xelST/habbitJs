@@ -2,6 +2,7 @@
 
 let habbits = [];
 const HABBIT_KEY = 'HABBIT_KEY';
+let trackerActiveHabbitId;
 
 // main obj 
 const page = {
@@ -20,13 +21,6 @@ const page = {
 // грех о сквернословие почитать
 
 // utils
-function loadData() {
-    const habbitsString = localStorage.getItem(HABBIT_KEY);
-    const habbitArray = JSON.parse(habbitsString);
-    if (Array.isArray(habbitArray)) {
-        habbits = habbitArray;
-    }
-}
 
 function requestJson(url) {
     // let req = new XMLHttpRequest();
@@ -45,7 +39,10 @@ function requestJson(url) {
     getResource(url)
     // .then(data => data.json())
     .then(data => JSON.stringify(data))
-    .then(data => localStorage.setItem(HABBIT_KEY, data))
+    .then(data => {
+        localStorage.setItem(HABBIT_KEY, data);
+        saveData();
+    })
     .catch(function(e) {
         console.log(`oblom ${e}}`)
     })
@@ -61,6 +58,18 @@ async function getResource(url) {
 }
 
 requestJson('./data/demo.json');
+
+function saveData() {
+    localStorage.setItem(HABBIT_KEY, JSON.stringify(habbits))
+}
+function loadData() {
+    const habbitsString = localStorage.getItem(HABBIT_KEY);
+    const habbitArray = JSON.parse(habbitsString);
+    if (Array.isArray(habbitArray)) {
+        habbits = habbitArray;
+    }
+    console.log(habbits)
+}
 
 // render 
 function rerenderMenu(activeHabbit) {
@@ -103,7 +112,7 @@ function rerenderContent(activeHabbit) {
         elem.innerHTML = `
             <div class="habbit__day">День ${Number(index) + 1}</div>
             <div class="habbit__comment">${activeHabbit.days[index].comment}</div>
-            <button class="habbit__delete" type="button">
+            <button class="habbit__delete" type="button" onclick="deleteDay(${index})">
                 <img src="./images/delete.svg" alt="delete ${index + 1}">
             </button>
         `;
@@ -113,6 +122,7 @@ function rerenderContent(activeHabbit) {
 }
 
 function rerender(activeHabbitId) {
+    trackerActiveHabbitId = activeHabbitId;
     const activeHabbit = habbits.find(habbit => habbit.id === activeHabbitId);
     if(!activeHabbit) {
         return;
@@ -120,6 +130,48 @@ function rerender(activeHabbitId) {
     rerenderMenu(activeHabbit);
     rerenderHead(activeHabbit);
     rerenderContent(activeHabbit);
+}
+
+// formData Days
+function addDays(event) {
+    event.preventDefault();
+    const form = event.target;
+    console.log(form);
+    const data = new FormData(form); //formData Api
+    // console.log(data.get('comment')); способ получения значения элемента value or name
+    const comment = data.get('comment');
+    form['comment'].classList.remove('error');
+    if(!comment) {
+        form['comment'].classList.add('error');
+    }
+    habbits = habbits.map(habbit => {
+        if (habbit.id === trackerActiveHabbitId) {
+            return {
+                ...habbit,
+                days: habbit.days.concat([{comment}])
+            };
+        }
+        return habbit;
+    })
+    form['comment'].value = '';
+    rerender(trackerActiveHabbitId);
+    saveData();
+}
+
+function deleteDay(index) {
+    habbits = habbits.map(habbit => {
+        if (habbit.id === trackerActiveHabbitId) {
+            habbit.days.splice(index, 1);
+            return {
+                ...habbit,
+                days: habbit.days
+            };
+        } else {
+            return habbit;
+        }
+    })
+    rerender(trackerActiveHabbitId);
+    saveData();
 }
 
 // init
