@@ -15,6 +15,10 @@ const page = {
     body: {
         daysContainer: document.getElementById('days'),
         day: document.querySelector('.habbit__day')
+    },
+    popup: {
+        toggle: document.querySelector('.cover'),
+        iconField: document.querySelector('.popup__form input[name="icon"]')
     }
 };
 
@@ -41,12 +45,11 @@ function requestJson(url) {
     .then(data => JSON.stringify(data))
     .then(data => {
         localStorage.setItem(HABBIT_KEY, data);
-        saveData();
     })
     .catch(function(e) {
         console.log(`oblom ${e}}`)
     })
-
+    
 }
 
 async function getResource(url) {
@@ -57,8 +60,6 @@ async function getResource(url) {
     return await req.json();
 }
 
-requestJson('./data/demo.json');
-
 function saveData() {
     localStorage.setItem(HABBIT_KEY, JSON.stringify(habbits))
 }
@@ -68,7 +69,7 @@ function loadData() {
     if (Array.isArray(habbitArray)) {
         habbits = habbitArray;
     }
-    console.log(habbits)
+    // console.log(habbits)
 }
 
 // render 
@@ -127,6 +128,7 @@ function rerender(activeHabbitId) {
     if(!activeHabbit) {
         return;
     }
+    console.log(activeHabbit)
     rerenderMenu(activeHabbit);
     rerenderHead(activeHabbit);
     rerenderContent(activeHabbit);
@@ -143,6 +145,7 @@ function addDays(event) {
     form['comment'].classList.remove('error');
     if(!comment) {
         form['comment'].classList.add('error');
+        return false
     }
     habbits = habbits.map(habbit => {
         if (habbit.id === trackerActiveHabbitId) {
@@ -159,6 +162,7 @@ function addDays(event) {
 }
 
 function deleteDay(index) {
+    // console.log(habbits)
     habbits = habbits.map(habbit => {
         if (habbit.id === trackerActiveHabbitId) {
             habbit.days.splice(index, 1);
@@ -171,11 +175,33 @@ function deleteDay(index) {
         }
     })
     rerender(trackerActiveHabbitId);
-    saveData();
+    saveData()
+}
+
+
+// togglePopup 
+document.addEventListener('keydown', (e) => {
+    if (e.code === 'Escape') {
+        togglePopup()
+    }
+})
+
+function togglePopup() {
+    page.popup.toggle.classList.toggle('cover_hidden')
+}
+sessionStorage.setItem('asd', 'adadsdada');
+
+// working with habits
+function setIcon(context, iconValue) {
+    page.popup.iconField.value = iconValue;
+    const activeIcon = document.querySelector('.icon.icon_active');
+    activeIcon.classList.remove('icon_active');
+    context.classList.add('icon_active')
 }
 
 // init
 (() => {
+    requestJson('./data/demo.json');
     loadData(); 
     rerender(habbits[0].id);
 })()
