@@ -42,14 +42,12 @@ function requestJson(url) {
 
     getResource(url)
     // .then(data => data.json())
-    .then(data => JSON.stringify(data))
     .then(data => {
-        localStorage.setItem(HABBIT_KEY, data);
+        localStorage.setItem(HABBIT_KEY, JSON.stringify(data));
     })
     .catch(function(e) {
         console.log(`oblom ${e}}`)
-    })
-    
+    }) 
 }
 
 async function getResource(url) {
