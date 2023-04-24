@@ -69,7 +69,6 @@ function loadData() {
     if (Array.isArray(habbitArray)) {
         habbits = habbitArray;
     }
-    // console.log(habbits)
 }
 
 // render 
@@ -128,7 +127,7 @@ function rerender(activeHabbitId) {
     if(!activeHabbit) {
         return;
     }
-    console.log(activeHabbit)
+    document.location.replace(document.location.pathname + '#' + activeHabbitId);
     rerenderMenu(activeHabbit);
     rerenderHead(activeHabbit);
     rerenderContent(activeHabbit);
@@ -137,26 +136,31 @@ function rerender(activeHabbitId) {
 // formData Days
 function addDays(event) {
     event.preventDefault();
-    const form = event.target;
-    console.log(form);
-    const data = new FormData(form); //formData Api
-    // console.log(data.get('comment')); способ получения значения элемента value or name
-    const comment = data.get('comment');
-    form['comment'].classList.remove('error');
-    if(!comment) {
-        form['comment'].classList.add('error');
-        return false
-    }
+    const data = validateForm(event.target, ['comment']);
+    if(!data) {
+        return;
+    } 
+    // const form = event.target;
+    // console.log(form);
+    // const data = new FormData(form); //formData Api
+    // // console.log(data.get('comment')); способ получения значения элемента value or name
+    // const comment = data.get('comment');
+    // form['comment'].classList.remove('error');
+    // if(!comment) {
+    //     form['comment'].classList.add('error');
+    //     return false
+    // }
     habbits = habbits.map(habbit => {
         if (habbit.id === trackerActiveHabbitId) {
             return {
                 ...habbit,
-                days: habbit.days.concat([{comment}])
+                days: habbit.days.concat([{comment: data.comment}])
             };
         }
         return habbit;
     })
-    form['comment'].value = '';
+    resetForm(event.target, ['comment']);
+    // form['comment'].value = '';
     rerender(trackerActiveHabbitId);
     saveData();
 }
@@ -175,7 +179,7 @@ function deleteDay(index) {
         }
     })
     rerender(trackerActiveHabbitId);
-    saveData()
+    saveData();
 }
 
 
@@ -189,6 +193,35 @@ document.addEventListener('keydown', (e) => {
 function togglePopup() {
     page.popup.toggle.classList.toggle('cover_hidden')
 }
+
+function resetForm(form, fields) {
+    for (const field of fields) {
+        form[field].value = '';
+    }
+}
+
+function validateForm (form, fields) {
+    const formData = new FormData(form); //formData Api
+    const res = {};
+    for (const field of fields) {
+        const fieldValue = formData.get(field);
+        form[field].classList.remove('error');
+        if(!fieldValue) {
+            form[field].classList.add('error');
+        }
+        res[field] = fieldValue;
+    }
+    let isValid = true;
+    for (const field of fields) {
+        if(!res[field]) {
+            isValid = false;
+        }
+    }
+    if(!habbits) {
+        return;
+    }
+    return res;
+}
 sessionStorage.setItem('asd', 'adadsdada');
 
 // working with habits
@@ -198,10 +231,36 @@ function setIcon(context, iconValue) {
     activeIcon.classList.remove('icon_active');
     context.classList.add('icon_active')
 }
+// add habit
+function addHabit(event) {
+    event.preventDefault();
+    const data = validateForm(event.target, ['name', 'icon', 'target']);
+    if(!data) {
+        return;
+    }
+    const maxId = habbits.reduce((acc, habbit) => acc > habbit.id ? acc : habbit.id, 0);
+    habbits.push({
+        id: maxId + 1,
+        name: data.name,
+        target: data.target,
+        icon: data.icon,
+        days: []
+    })
+    resetForm(event.target, ['name', 'target']);
+    togglePopup();
+    saveData(); 
+    rerender(maxId + 1);
+}
 
 // init
 (() => {
     requestJson('./data/demo.json');
-    loadData(); 
-    rerender(habbits[0].id);
+    loadData();
+    const hashId =Number(document.location.hash.replace('#', ''));
+    const activeUrl =  habbits.find(habbit => habbit.id == hashId);
+    if(activeUrl) {
+        rerender(activeUrl.id);
+    } else {
+        rerender(habbits[0].id);
+    }
 })()
