@@ -40,14 +40,13 @@ function requestJson(url) {
     //     }
     // };
 
-    getResource(url)
-    // .then(data => data.json())
-    .then(data => {
-        localStorage.setItem(HABBIT_KEY, JSON.stringify(data));
+    return getResource(url)
+    .then(function(data) {
+        return data
     })
     .catch(function(e) {
         console.log(`oblom ${e}}`)
-    }) 
+    })
 }
 
 async function getResource(url) {
@@ -56,6 +55,11 @@ async function getResource(url) {
         throw new Error(`could not fetch ${url}, status: ${req.status}`)
     }
     return await req.json();
+}
+
+if (localStorage.getItem(HABBIT_KEY) == null) {
+    const firstSaveJson = requestJson('./data/demo.json');
+    firstSaveJson.then((data) => localStorage.setItem(HABBIT_KEY, JSON.stringify(data)))   
 }
 
 function saveData() {
