@@ -59,7 +59,7 @@ async function getResource(url) {
 
 if (localStorage.getItem(HABBIT_KEY) == null) {
     const firstSaveJson = requestJson('./data/demo.json');
-    firstSaveJson.then((data) => localStorage.setItem(HABBIT_KEY, JSON.stringify(data)))   
+    firstSaveJson.then((data) => localStorage.setItem(HABBIT_KEY, JSON.stringify(data))) 
 }
 
 function saveData() {
@@ -256,7 +256,6 @@ function addHabit(event) {
 
 // init
 (() => {
-    requestJson('./data/demo.json');
     loadData();
     const hashId =Number(document.location.hash.replace('#', ''));
     const activeUrl =  habbits.find(habbit => habbit.id == hashId);
